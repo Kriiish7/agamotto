@@ -1,0 +1,138 @@
+# =========================
+
+# 🦀 Rust / Cargo
+
+# =========================
+
+target/
+**/target/
+Cargo.lock
+
+# Keep Cargo.lock ONLY if this is an app (uncomment if needed)
+
+#! Cargo.lock
+
+# Rustfmt / Clippy caches
+
+.rustfmt.toml.bk
+.clippy.toml.bk
+
+# =========================
+
+# 🖥️ GPUI / App Artifacts
+
+# =========================
+
+# Runtime caches / temp UI state
+
+*.cache
+*.tmp
+*.log
+
+# Generated UI assets (if you ever add them)
+
+dist/
+build/
+out/
+
+# GPU / shader cache (if applicable)
+
+*.spv
+*.wgsl.cache
+
+# =========================
+
+# 🪟 Windows junk
+
+# =========================
+
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# =========================
+
+# 🧠 Editor / IDE
+
+# =========================
+
+.vscode/
+.idea/
+*.code-workspace
+
+# Vim / Neovim
+
+*.swp
+*.swo
+*~
+
+# =========================
+
+# 🔐 Env / Secrets
+
+# =========================
+
+.env
+.env.*
+!.env.example
+
+# =========================
+
+# 📦 Node (if you add tooling later)
+
+# =========================
+
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+pnpm-lock.yaml
+
+# =========================
+
+# 🧪 Testing / Coverage
+
+# =========================
+
+coverage/
+*.profraw
+*.profdata
+
+# =========================
+
+# 📁 Logs / Debug
+
+# =========================
+
+logs/
+*.log
+
+# =========================
+
+# 🧱 Misc
+
+# =========================
+
+.DS_Store
+
+# Ignore temporary exports or screenshots
+
+*.png
+*.jpg
+*.jpeg
+*.gif
+
+# BUT allow assets folder explicitly
+
+!assets/
+!assets/**
+
+# =========================
+
+# 🧪 Worktrees (optional)
+
+# =========================
+
+# If you're using git worktrees heavily
+
+.git/worktrees/
