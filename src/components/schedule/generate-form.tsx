@@ -1,0 +1,132 @@
+import * as React from "react"
+
+import { Button } from "@/components/ui/button"
+import { Field, FieldDescription, FieldLabel } from "@/components/ui/field"
+import { Input } from "@/components/ui/input"
+import { ArrowsClockwiseIcon, CalendarBlankIcon } from "@phosphor-icons/react"
+import {
+  defaultRange,
+  endOfLocalDay,
+  fromDateInputValue,
+  toDateInputValue,
+} from "./format"
+
+type GenerateFormProps = {
+  disabled?: boolean
+  busy?: boolean
+  canReschedule?: boolean
+  onGenerate: (range: { rangeStart: number; rangeEnd: number }) => Promise<void>
+  onReschedule?: () => Promise<void>
+}
+
+export function GenerateScheduleForm({
+  disabled,
+  busy,
+  canReschedule,
+  onGenerate,
+  onReschedule,
+}: GenerateFormProps) {
+  const initial = defaultRange()
+  const [startDate, setStartDate] = React.useState(toDateInputValue(initial.start))
+  const [endDate, setEndDate] = React.useState(toDateInputValue(initial.end))
+  const [error, setError] = React.useState<string | null>(null)
+
+  async function handleGenerate(event: React.FormEvent) {
+    event.preventDefault()
+    const rangeStart = fromDateInputValue(startDate)
+    const rangeEnd = endOfLocalDay(fromDateInputValue(endDate))
+    if (!Number.isFinite(rangeStart) || !Number.isFinite(rangeEnd)) {
+      setError("Pick a valid start and end date.")
+      return
+    }
+    if (rangeEnd < rangeStart) {
+      setError("End date must be on or after the start date.")
+      return
+    }
+    setError(null)
+    await onGenerate({ rangeStart, rangeEnd })
+  }
+
+  return (
+    <form
+      onSubmit={(e) => void handleGenerate(e)}
+      className="relative overflow-hidden rounded-2xl border border-zinc-200/80 bg-gradient-to-br from-zinc-50 via-white to-zinc-100/80 p-4 sm:p-5"
+    >
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 opacity-[0.35]"
+        style={{
+          backgroundImage:
+            "radial-gradient(ellipse at 0% 0%, oklch(0.92 0.01 80 / 0.7), transparent 55%), radial-gradient(ellipse at 100% 100%, oklch(0.93 0.008 250 / 0.5), transparent 50%)",
+        }}
+      />
+      <div className="relative space-y-4">
+        <div className="flex items-start gap-3">
+          <div className="flex size-9 shrink-0 items-center justify-center rounded-xl border border-zinc-200 bg-white text-zinc-700 shadow-sm">
+            <CalendarBlankIcon className="size-4" weight="duotone" />
+          </div>
+          <div>
+            <h2 className="text-sm font-medium tracking-tight text-zinc-900">
+              Generate schedule
+            </h2>
+            <p className="mt-0.5 max-w-xl text-sm text-zinc-500">
+              Pick a horizon. Agamotto packs ready tasks into your working
+              windows and explains every placement.
+            </p>
+          </div>
+        </div>
+
+        <div className="grid gap-3 sm:grid-cols-2">
+          <Field>
+            <FieldLabel htmlFor="schedule-range-start">From</FieldLabel>
+            <Input
+              id="schedule-range-start"
+              type="date"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              disabled={disabled || busy}
+              required
+            />
+          </Field>
+          <Field>
+            <FieldLabel htmlFor="schedule-range-end">Through</FieldLabel>
+            <Input
+              id="schedule-range-end"
+              type="date"
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+              disabled={disabled || busy}
+              required
+            />
+            <FieldDescription>
+              Inclusive end of day in your local timezone.
+            </FieldDescription>
+          </Field>
+        </div>
+
+        {error ? (
+          <p className="text-sm text-destructive" role="alert">
+            {error}
+          </p>
+        ) : null}
+
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+          <Button type="submit" disabled={disabled || busy}>
+            {busy ? "Working…" : "Generate schedule"}
+          </Button>
+          {onReschedule ? (
+            <Button
+              type="button"
+              variant="outline"
+              disabled={disabled || busy || !canReschedule}
+              onClick={() => void onReschedule()}
+            >
+              <ArrowsClockwiseIcon data-icon="inline-start" />
+              Reschedule incomplete
+            </Button>
+          ) : null}
+        </div>
+      </div>
+    </form>
+  )
+}
