@@ -39,6 +39,13 @@ const scheduleBlockStatus = v.union(
   v.literal("moved"),
 )
 
+/** Task the packer delayed or excluded, with a human-readable reason. */
+const deferredItem = v.object({
+  taskId: v.string(),
+  title: v.string(),
+  reason: v.string(),
+})
+
 /**
  * Agamotto domain schema.
  *
@@ -100,6 +107,12 @@ export default defineSchema({
     mode: scheduleMode,
     generatedAt: v.number(),
     status: scheduleStatus,
+    /**
+     * Snapshot of scheduler deferred work for this generation.
+     * Optional so pre-persistence schedules still load; new writes always set both.
+     */
+    delayed: v.optional(v.array(deferredItem)),
+    excluded: v.optional(v.array(deferredItem)),
   })
     .index("by_user", ["userId"])
     .index("by_user_status", ["userId", "status"])
