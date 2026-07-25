@@ -1,3 +1,4 @@
+import * as React from "react"
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router"
 import {
   CalendarBlank,
@@ -21,6 +22,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarRail,
+  useSidebar,
 } from "@/components/ui/sidebar"
 
 const navItems = [
@@ -35,6 +37,12 @@ export function AppSidebar() {
   const { user, signOut } = useAuth()
   const navigate = useNavigate()
   const pathname = useRouterState({ select: (s) => s.location.pathname })
+  const { setOpenMobile } = useSidebar()
+
+  // Close the mobile sheet whenever the route changes (nav click or back).
+  React.useEffect(() => {
+    setOpenMobile(false)
+  }, [pathname, setOpenMobile])
 
   return (
     <Sidebar collapsible="icon">
@@ -70,6 +78,7 @@ export function AppSidebar() {
                       render={<Link to={item.to} />}
                       isActive={isActive}
                       tooltip={item.title}
+                      onClick={() => setOpenMobile(false)}
                     >
                       <Icon weight="duotone" />
                       <span>{item.title}</span>
@@ -88,6 +97,7 @@ export function AppSidebar() {
             <SidebarMenuButton
               tooltip="Sign out"
               onClick={() => {
+                setOpenMobile(false)
                 signOut()
                 void navigate({ to: "/login" })
               }}
