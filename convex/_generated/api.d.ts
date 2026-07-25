@@ -8,13 +8,23 @@
  * @module
  */
 
+import type * as lib_scheduleHelpers from "../lib/scheduleHelpers.js";
+import type * as schedulerBridge from "../schedulerBridge.js";
+import type * as schedules from "../schedules.js";
+import type * as seed from "../seed.js";
+
 import type {
   ApiFromModules,
   FilterApi,
   FunctionReference,
 } from "convex/server";
 
-declare const fullApi: ApiFromModules<{}>;
+declare const fullApi: ApiFromModules<{
+  "lib/scheduleHelpers": typeof lib_scheduleHelpers;
+  schedulerBridge: typeof schedulerBridge;
+  schedules: typeof schedules;
+  seed: typeof seed;
+}>;
 
 /**
  * A utility for referencing Convex functions in your app's public API.
