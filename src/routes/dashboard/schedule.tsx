@@ -9,7 +9,6 @@ import {
   ScheduleTimeline,
   useDemoUserId,
 } from "@/components/schedule"
-import type { GenerationMeta } from "@/components/schedule"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { useAuth } from "@/lib/auth"
 import { api } from "../../../convex/_generated/api"
@@ -24,8 +23,6 @@ function SchedulePage() {
   const { userId, setUserId, ready } = useDemoUserId()
   const [activeScheduleId, setActiveScheduleId] =
     React.useState<Id<"schedules"> | null>(null)
-  const [generationMeta, setGenerationMeta] =
-    React.useState<GenerationMeta | null>(null)
   const [busy, setBusy] = React.useState(false)
   const [actionError, setActionError] = React.useState<string | null>(null)
   const [editing, setEditing] = React.useState<Doc<"scheduleBlocks"> | null>(
@@ -68,6 +65,19 @@ function SchedulePage() {
     return map
   }, [tasks])
 
+  // Deferred comes from the schedule record (cold load / refresh / switch).
+  const delayed = scheduleDetail?.delayed ?? []
+  const excluded = scheduleDetail?.excluded ?? []
+  const packedSummary =
+    scheduleDetail?.schedule && scheduleDetail.blocks
+      ? {
+          mode: scheduleDetail.schedule.mode,
+          blockCount: scheduleDetail.blocks.length,
+          delayedCount: delayed.length,
+          excludedCount: excluded.length,
+        }
+      : null
+
   async function handleGenerate(range: {
     rangeStart: number
     rangeEnd: number
@@ -82,12 +92,6 @@ function SchedulePage() {
         rangeEnd: range.rangeEnd,
       })
       setActiveScheduleId(result.scheduleId)
-      setGenerationMeta({
-        mode: result.mode,
-        delayed: result.delayed,
-        excluded: result.excluded,
-        blockCount: result.blockCount,
-      })
     } catch (err) {
       setActionError(
         err instanceof Error ? err.message : "Failed to generate schedule",
@@ -102,15 +106,9 @@ function SchedulePage() {
     setBusy(true)
     setActionError(null)
     try {
-      const result = await rescheduleIncomplete({
+      await rescheduleIncomplete({
         userId,
         scheduleId: activeScheduleId,
-      })
-      setGenerationMeta({
-        mode: result.mode,
-        delayed: result.delayed,
-        excluded: result.excluded,
-        blockCount: result.blockCount,
       })
     } catch (err) {
       setActionError(
@@ -151,25 +149,16 @@ function SchedulePage() {
         <h1 className="text-2xl font-medium tracking-tight">Schedule</h1>
         <p className="max-w-2xl text-sm text-muted-foreground">
           Generate a plan, then read the timeline as a trail of decisions —
-          every block says why it is there. Signed in as{" "}
-          <span className="text-foreground">{user?.name ?? "guest"}</span>
-          {user?.email ? (
+          every block says why it is there.
+          {user?.name ? (
             <>
               {" "}
-              (<span className="font-mono text-xs">{user.email}</span>)
+              Signed in as{" "}
+              <span className="text-foreground">{user.name}</span>.
             </>
           ) : null}
-          .
         </p>
       </div>
-
-      {ready ? (
-        <DemoUserSetup
-          userId={userId}
-          onSave={setUserId}
-          onClear={() => setUserId(null)}
-        />
-      ) : null}
 
       <GenerateScheduleForm
         disabled={!userId}
@@ -186,19 +175,19 @@ function SchedulePage() {
         </Alert>
       ) : null}
 
-      {generationMeta ? (
+      {packedSummary ? (
         <p className="text-sm text-zinc-500">
-          Last run packed{" "}
+          This schedule packed{" "}
           <span className="font-medium text-zinc-800">
-            {generationMeta.blockCount}
+            {packedSummary.blockCount}
           </span>{" "}
           blocks in{" "}
           <span className="font-medium capitalize text-zinc-800">
-            {generationMeta.mode}
+            {packedSummary.mode}
           </span>{" "}
           mode
-          {generationMeta.delayed.length + generationMeta.excluded.length > 0
-            ? ` · ${generationMeta.delayed.length} delayed · ${generationMeta.excluded.length} excluded`
+          {packedSummary.delayedCount + packedSummary.excludedCount > 0
+            ? ` · ${packedSummary.delayedCount} delayed · ${packedSummary.excludedCount} excluded`
             : null}
           .
         </p>
@@ -210,10 +199,7 @@ function SchedulePage() {
             <button
               key={s._id}
               type="button"
-              onClick={() => {
-                setActiveScheduleId(s._id)
-                setGenerationMeta(null)
-              }}
+              onClick={() => setActiveScheduleId(s._id)}
               className={
                 s._id === activeScheduleId
                   ? "rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-1.5 text-xs font-medium text-white"
@@ -232,8 +218,8 @@ function SchedulePage() {
         schedule={scheduleDetail?.schedule}
         blocks={scheduleDetail?.blocks}
         taskTitles={taskTitles}
-        delayed={generationMeta?.delayed ?? []}
-        excluded={generationMeta?.excluded ?? []}
+        delayed={delayed}
+        excluded={excluded}
         loading={detailLoading}
         onEditBlock={setEditing}
       />
@@ -246,6 +232,14 @@ function SchedulePage() {
         }}
         onSave={handleOverride}
       />
+
+      {ready ? (
+        <DemoUserSetup
+          userId={userId}
+          onSave={setUserId}
+          onClear={() => setUserId(null)}
+        />
+      ) : null}
     </section>
   )
 }

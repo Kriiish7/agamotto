@@ -10,4 +10,4 @@ export {
   readDemoUserId,
   writeDemoUserId,
 } from "./demo-user-id"
-export type { DeferredItem, GenerationMeta } from "./types"
+export type { DeferredItem } from "./types"
