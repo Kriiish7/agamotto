@@ -1,12 +1,21 @@
-# agamotto
+# TanStack Start + shadcn/ui
 
-Created with Create GPUI App.
+This is a template for a new TanStack Start project with React, TypeScript, and shadcn/ui.
 
-- [`gpui`](https://www.gpui.rs/)
-- [GPUI documentation](https://github.com/zed-industries/zed/tree/main/crates/gpui/docs)
-- [GPUI examples](https://github.com/zed-industries/zed/tree/main/crates/gpui/examples)
+## Adding components
 
-## Usage
+To add components to your app, run the following command:
 
-- Ensure Rust is installed - [Rustup](https://rustup.rs/)
-- Run your app with `cargo run`
+```bash
+npx shadcn@latest add button
+```
+
+This will place the ui components in the `components` directory.
+
+## Using components
+
+To use the components in your app, import them as follows:
+
+```tsx
+import { Button } from "@/components/ui/button";
+```
