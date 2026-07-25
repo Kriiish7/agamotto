@@ -110,13 +110,13 @@ export function TimelineBlockCard({
           {long ? (
             <button
               type="button"
-              className="mt-1.5 inline-flex items-center gap-1 text-xs font-medium text-zinc-600 underline-offset-2 hover:underline"
+              className="mt-1.5 inline-flex items-center gap-1 rounded-sm text-xs font-medium text-zinc-600 underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
               onClick={() => setExpanded((v) => !v)}
               aria-expanded={expanded}
             >
               <CaretDownIcon
                 className={cn(
-                  "size-3 transition-transform",
+                  "size-3 transition-transform motion-reduce:transition-none",
                   expanded && "rotate-180",
                 )}
               />

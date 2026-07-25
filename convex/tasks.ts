@@ -72,6 +72,23 @@ async function requireOwnedTask(
   return task
 }
 
+/** Ensure every dependsOn id exists and is owned by the same user. */
+async function assertDependsOnOwned(
+  ctx: MutationCtx,
+  userId: Id<"users">,
+  dependsOn: Id<"tasks">[],
+) {
+  for (const depId of dependsOn) {
+    const dep = await ctx.db.get(depId)
+    if (!dep) {
+      throw new Error("dependsOn task not found")
+    }
+    if (dep.userId !== userId) {
+      throw new Error("dependsOn task does not belong to user")
+    }
+  }
+}
+
 /** Create a task and record history. */
 export const create = mutation({
   args: {
@@ -101,6 +118,7 @@ export const create = mutation({
     const now = Date.now()
     const status = args.status ?? "inbox"
     const dependsOn = args.dependsOn ?? []
+    await assertDependsOnOwned(ctx, args.userId, dependsOn)
 
     const taskId = await ctx.db.insert("tasks", {
       userId: args.userId,
@@ -162,6 +180,9 @@ export const update = mutation({
     }
     if (args.priority !== undefined) {
       assertPriority(args.priority)
+    }
+    if (args.dependsOn !== undefined) {
+      await assertDependsOnOwned(ctx, args.userId, args.dependsOn)
     }
 
     const title =

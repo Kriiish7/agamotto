@@ -96,14 +96,6 @@ function TasksPage() {
         </p>
       </div>
 
-      {ready ? (
-        <DemoUserSetup
-          userId={userId}
-          onSave={setUserId}
-          onClear={() => setUserId(null)}
-        />
-      ) : null}
-
       <QuickAddBar disabled={!userId} onSubmit={handleQuickAdd} />
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -141,7 +133,7 @@ function TasksPage() {
 
       {!userId ? (
         <p className="text-sm text-muted-foreground">
-          Paste a seeded Convex userId above to load tasks.
+          Paste a seeded Convex userId in the demo strip below to load tasks.
         </p>
       ) : tasks === undefined ? (
         <p className="text-sm text-muted-foreground">Loading tasks…</p>
@@ -180,6 +172,15 @@ function TasksPage() {
           await cancelTask({ userId, taskId: cancelling._id })
         }}
       />
+
+      {ready ? (
+        <DemoUserSetup
+          userId={userId}
+          onSave={setUserId}
+          onClear={() => setUserId(null)}
+          inputId="tasks-convex-user-id"
+        />
+      ) : null}
     </section>
   )
 }

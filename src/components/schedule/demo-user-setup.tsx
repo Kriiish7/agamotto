@@ -16,13 +16,23 @@ type DemoUserSetupProps = {
   userId: string | null
   onSave: (userId: string) => void
   onClear: () => void
+  /** Optional input id to avoid duplicate ids when multiple mounts exist. */
+  inputId?: string
 }
 
 /**
- * Dev-only Convex userId bridge. Kept out of the Schedule first viewport —
- * Generate + Timeline own the composition; this lives in a collapsible strip.
+ * Dev-only Convex userId bridge. Collapsible + demoted so it does not own the
+ * first viewport on Schedule / Tasks / Analytics.
+ *
+ * Seed (internal mutation; CLI-only):
+ *   npx convex run seed:seedDemo
  */
-export function DemoUserSetup({ userId, onSave, onClear }: DemoUserSetupProps) {
+export function DemoUserSetup({
+  userId,
+  onSave,
+  onClear,
+  inputId = "demo-convex-user-id",
+}: DemoUserSetupProps) {
   const [draft, setDraft] = React.useState(userId ?? "")
   const [error, setError] = React.useState<string | null>(null)
   // Expand when unset so the user can paste without hunting; collapse when set.
@@ -54,6 +64,7 @@ export function DemoUserSetup({ userId, onSave, onClear }: DemoUserSetupProps) {
         className={cn(
           "flex w-full items-center justify-between gap-3 px-3 py-2 text-left text-xs text-zinc-600",
           "hover:bg-zinc-100/80",
+          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
         )}
       >
         <span className="font-medium text-zinc-700">
@@ -64,13 +75,13 @@ export function DemoUserSetup({ userId, onSave, onClear }: DemoUserSetupProps) {
             </span>
           ) : (
             <span className="ml-2 font-normal text-amber-800">
-              required to generate
+              required for Convex data
             </span>
           )}
         </span>
         <CaretDownIcon
           className={cn(
-            "size-3.5 shrink-0 text-zinc-500 transition-transform",
+            "size-3.5 shrink-0 text-zinc-500 transition-transform motion-reduce:transition-none",
             open && "rotate-180",
           )}
           weight="bold"
@@ -97,11 +108,9 @@ export function DemoUserSetup({ userId, onSave, onClear }: DemoUserSetupProps) {
               className="flex flex-col gap-2 sm:flex-row sm:items-end"
             >
               <Field className="flex-1">
-                <FieldLabel htmlFor="schedule-convex-user-id">
-                  Convex user id
-                </FieldLabel>
+                <FieldLabel htmlFor={inputId}>Convex user id</FieldLabel>
                 <Input
-                  id="schedule-convex-user-id"
+                  id={inputId}
                   value={draft}
                   onChange={(e) => setDraft(e.target.value)}
                   placeholder="j57…"

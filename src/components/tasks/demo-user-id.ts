@@ -9,7 +9,7 @@ import type { Id } from "../../../convex/_generated/dataModel"
  *
  * ## How to get a working userId
  *
- * 1. Seed demo data (creates Ada Lovelace):
+ * 1. Seed demo data (internal mutation; CLI works — creates Ada Lovelace):
  *    `npx convex run seed:seedDemo`
  * 2. Copy the returned `userId` (Ada's id) from the CLI output.
  * 3. Paste it into the "Convex user id" field on `/dashboard/tasks`, or set:

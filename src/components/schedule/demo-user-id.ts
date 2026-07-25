@@ -9,7 +9,8 @@ import type { Id } from "../../../convex/_generated/dataModel"
  *
  * ## How to get a working userId
  *
- * 1. Seed demo data: `npx convex run seed:seedDemo`
+ * 1. Seed demo data (internal mutation; CLI works):
+ *    `npx convex run seed:seedDemo`
  * 2. Copy the returned `userId` (Ada's id) from the CLI output.
  * 3. Paste it into the Convex user id field, or set:
  *    `localStorage.setItem("agamotto.convex-user-id", "<userId>")`

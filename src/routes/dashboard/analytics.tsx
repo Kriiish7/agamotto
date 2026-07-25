@@ -88,17 +88,9 @@ function AnalyticsPage() {
         </p>
       </div>
 
-      {ready ? (
-        <DemoUserSetup
-          userId={userId}
-          onSave={setUserId}
-          onClear={() => setUserId(null)}
-        />
-      ) : null}
-
       {!userId ? (
         <p className="text-sm text-muted-foreground">
-          Paste a seeded Convex userId above to load analytics.
+          Paste a seeded Convex userId in the demo strip below to load analytics.
         </p>
       ) : (
         <>
@@ -144,6 +136,15 @@ function AnalyticsPage() {
           />
         </>
       )}
+
+      {ready ? (
+        <DemoUserSetup
+          userId={userId}
+          onSave={setUserId}
+          onClear={() => setUserId(null)}
+          inputId="analytics-convex-user-id"
+        />
+      ) : null}
     </section>
   )
 }

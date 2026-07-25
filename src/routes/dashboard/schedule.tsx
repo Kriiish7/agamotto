@@ -202,8 +202,8 @@ function SchedulePage() {
               onClick={() => setActiveScheduleId(s._id)}
               className={
                 s._id === activeScheduleId
-                  ? "rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-1.5 text-xs font-medium text-white"
-                  : "rounded-xl border border-zinc-200 bg-white px-3 py-1.5 text-xs font-medium text-zinc-600 hover:border-zinc-300"
+                  ? "rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-1.5 text-xs font-medium text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  : "rounded-xl border border-zinc-200 bg-white px-3 py-1.5 text-xs font-medium text-zinc-600 hover:border-zinc-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
               }
             >
               <span className="capitalize">{s.status}</span>
@@ -238,6 +238,7 @@ function SchedulePage() {
           userId={userId}
           onSave={setUserId}
           onClear={() => setUserId(null)}
+          inputId="schedule-convex-user-id"
         />
       ) : null}
     </section>

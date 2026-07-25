@@ -1,5 +1,5 @@
 import { v } from "convex/values"
-import { internalMutation, mutation } from "./_generated/server"
+import { internalMutation } from "./_generated/server"
 import type { Id } from "./_generated/dataModel"
 import type { MutationCtx } from "./_generated/server"
 
@@ -139,25 +139,17 @@ async function runReminderPass(ctx: MutationCtx, now: number) {
 /**
  * Scan for upcoming schedule blocks and overdue open tasks, then stub-send
  * reminder emails. Invoked by the Convex cron in `crons.ts`.
+ *
+ * Internal-only (no public client export) — returns email addresses in the
+ * stub result, so it must not be callable from the browser.
+ *
+ * Manual / local trigger:
+ *   npx convex run notifications:checkReminders
+ *   npx convex run notifications:checkReminders '{"now": 0}'
  */
 export const checkReminders = internalMutation({
   args: {
     /** Optional override for tests; defaults to Date.now(). */
-    now: v.optional(v.number()),
-  },
-  handler: async (ctx, args) => {
-    return await runReminderPass(ctx, args.now ?? Date.now())
-  },
-})
-
-/**
- * Manual trigger for local/dev runs:
- *   npx convex run notifications:runReminderCheck
- *
- * TODO(auth): restrict to admin / internal once auth lands.
- */
-export const runReminderCheck = mutation({
-  args: {
     now: v.optional(v.number()),
   },
   handler: async (ctx, args) => {

@@ -1,12 +1,16 @@
-import { mutation } from "./_generated/server"
+import { internalMutation } from "./_generated/server"
 import type { Id } from "./_generated/dataModel"
 
 /**
  * Dev seed: one test user, 10 varied tasks (some overloaded for Crunch),
  * and stub correctionFactors at 1.0.
  *
- * Run once against your Convex deployment:
+ * Internal-only so the public Convex API cannot mint users/tasks. CLI still
+ * works (Convex allows `npx convex run` on internal functions):
  *   npx convex run seed:seedDemo
+ *
+ * Copy the returned `userId` into the dashboard demo-user strip (localStorage
+ * key `agamotto.convex-user-id`).
  *
  * Re-running creates another user+tasks set (idempotent wipe is intentionally
  * omitted so parallel tracks can keep their own seed rows if needed).
@@ -146,7 +150,7 @@ const SEED_TASKS: SeedTask[] = [
   },
 ]
 
-export const seedDemo = mutation({
+export const seedDemo = internalMutation({
   args: {},
   handler: async (ctx) => {
     const now = Date.now()
