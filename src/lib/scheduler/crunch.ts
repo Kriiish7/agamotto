@@ -3,6 +3,7 @@ import {
   crunchScore,
   defer,
   dependencyTitles,
+  depsSatisfied,
   placeTask,
   remainingHours,
   taskById,
@@ -70,8 +71,9 @@ function transitiveDeps(taskId: string, byId: Map<string, Task>): string[] {
 }
 
 /**
- * Close a selected set under dependencies. If the closure exceeds capacity,
- * drop lowest-value selected tasks (never dropping a dep still required).
+ * Close a selected set under dependencies. Missing/excluded deps are blockers:
+ * dependents that need them are dropped from the plan (never scheduled alone).
+ * If the closure exceeds capacity, drop lowest-value leaves (never a required dep).
  */
 function closeUnderDependencies(
   selectedIds: Set<string>,
@@ -80,17 +82,26 @@ function closeUnderDependencies(
   capacityMinutes: number,
   referenceMs: number,
 ): Set<string> {
-  const closed = new Set(selectedIds)
-  for (const id of [...selectedIds]) {
-    for (const depId of transitiveDeps(id, byId)) {
-      closed.add(depId)
-    }
+  const candidateIds = new Set(candidates.map((t) => t.id))
+  const closed = new Set<string>()
+  for (const id of selectedIds) {
+    if (candidateIds.has(id)) closed.add(id)
   }
 
-  // Only keep tasks that were in the candidate pool.
-  const candidateIds = new Set(candidates.map((t) => t.id))
+  // Drop dependents whose transitive deps are not all candidates (oversized,
+  // never present, etc.). Do not silently ignore missing deps.
+  const depsAvailable = (id: string) =>
+    transitiveDeps(id, byId).every((depId) => candidateIds.has(depId))
+
   for (const id of [...closed]) {
-    if (!candidateIds.has(id)) closed.delete(id)
+    if (!depsAvailable(id)) closed.delete(id)
+  }
+
+  // Add every available transitive dependency into the closed set.
+  for (const id of [...closed]) {
+    for (const depId of transitiveDeps(id, byId)) {
+      if (candidateIds.has(depId)) closed.add(depId)
+    }
   }
 
   const weightOf = (id: string) =>
@@ -122,6 +133,19 @@ function closeUnderDependencies(
     if (stillNeeded) continue
     closed.delete(id)
     total -= weightOf(id)
+  }
+
+  // After capacity drops, cascade-remove anything whose deps left the set.
+  let changed = true
+  while (changed) {
+    changed = false
+    for (const id of [...closed]) {
+      const missing = transitiveDeps(id, byId).some((depId) => !closed.has(depId))
+      if (missing) {
+        closed.delete(id)
+        changed = true
+      }
+    }
   }
 
   return closed
@@ -180,14 +204,23 @@ export function scheduleCrunch(
     referenceMs,
   )
 
-  // Remainder of candidates → delayed.
+  // Remainder of candidates → delayed, or excluded when deps are not on the plan.
   for (const task of candidates) {
-    if (!selected.has(task.id)) {
+    if (selected.has(task.id)) continue
+    const unmetDepIds = (task.dependsOn ?? []).filter(
+      (depId) => !selected.has(depId),
+    )
+    if (unmetDepIds.length > 0) {
+      const titles = unmetDepIds.map(
+        (id) => byId.get(id)?.title ?? id,
+      )
+      excluded.push(defer(task, "crunch", "excluded", titles))
+    } else {
       delayed.push(defer(task, "crunch", "delayed"))
     }
   }
 
-  // EDF order among selected, but only schedule when deps (also selected) are done.
+  // EDF order among selected; deps must be completed in-plan (never skip).
   const selectedTasks = candidates.filter((t) => selected.has(t.id))
   const pending = new Set(selectedTasks.map((t) => t.id))
   const completed = new Set<string>()
@@ -196,15 +229,7 @@ export function scheduleCrunch(
   while (pending.size > 0) {
     const ready = [...pending]
       .map((id) => byId.get(id))
-      .filter((task): task is Task => {
-        if (!task) return false
-        // Deps outside the selected set were already excluded/delayed —
-        // treat missing selected deps as blockers; missing unselected deps unblock.
-        const deps = task.dependsOn ?? []
-        return deps.every(
-          (depId) => !selected.has(depId) || completed.has(depId),
-        )
-      })
+      .filter((task): task is Task => !!task && depsSatisfied(task, completed))
 
     if (ready.length === 0) {
       for (const id of pending) {

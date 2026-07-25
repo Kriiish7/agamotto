@@ -252,3 +252,39 @@ describe("oversized-task edge case", () => {
     assertExplanations(result.blocks)
   })
 })
+
+describe("crunch dependency integrity", () => {
+  it("does not place a dependent when its dependency was excluded as oversized", () => {
+    // Outline (10h) cannot fit a 3h window → excluded. Draft (1h) depends on
+    // Outline and must NOT be placed just because Outline is outside the set.
+    const tasks: Task[] = [
+      {
+        id: "outline",
+        title: "Outline",
+        estimatedHours: 10,
+        priority: 8,
+        deadline: "2026-07-28T00:00:00.000Z",
+      },
+      {
+        id: "draft",
+        title: "Draft",
+        estimatedHours: 1,
+        priority: 10,
+        deadline: "2026-07-27T18:00:00.000Z",
+        dependsOn: ["outline"],
+      },
+    ]
+    const result = scheduleCrunch(tasks, [mondayMorning])
+
+    expect(result.blocks.some((b) => b.taskId === "draft")).toBe(false)
+    expect(result.blocks.some((b) => b.taskId === "outline")).toBe(false)
+    expect(result.excluded.some((e) => e.taskId === "outline")).toBe(true)
+
+    const draftDeferred = [...result.excluded, ...result.delayed].find(
+      (d) => d.taskId === "draft",
+    )
+    expect(draftDeferred).toBeDefined()
+    expect(draftDeferred!.reason.toLowerCase()).toMatch(/depend/)
+    expect(draftDeferred!.reason).toMatch(/Outline/)
+  })
+})

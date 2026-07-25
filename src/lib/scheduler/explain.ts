@@ -70,7 +70,9 @@ export function explain(input: ExplainInput): string {
       return `"${title}" is delayed: Crunch kept higher-value work under today's time budget, and this task did not make the cut.`
     }
     if (deps) {
-      return `"${title}" waits until ${deps} is finished — dependencies stay ahead of dependents.`
+      const verb =
+        (input.dependencyTitles?.length ?? 0) === 1 ? "is" : "are"
+      return `"${title}" waits until ${deps} ${verb} finished — dependencies stay ahead of dependents.`
     }
     return `"${title}" waits for a later plan — today's free windows are already claimed by higher-scoring work.`
   }
