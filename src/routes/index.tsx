@@ -1,19 +1,15 @@
-import { createFileRoute } from "@tanstack/react-router"
-import { Button } from "@/components/ui/button"
+import { createFileRoute, Navigate } from "@tanstack/react-router"
 
-export const Route = createFileRoute("/")({ component: App })
+import { AuthLoading } from "@/components/auth-gate"
+import { useAuth } from "@/lib/auth"
 
-function App() {
-  return (
-    <div className="flex min-h-svh p-6">
-      <div className="flex max-w-md min-w-0 flex-col gap-4 text-sm leading-loose">
-        <div>
-          <h1 className="font-medium">Project ready!</h1>
-          <p>You may now add components and start building.</p>
-          <p>We&apos;ve already added the button component for you.</p>
-          <Button className="mt-2">Button</Button>
-        </div>
-      </div>
-    </div>
-  )
+export const Route = createFileRoute("/")({ component: HomeRedirect })
+
+function HomeRedirect() {
+  const { user, isLoading } = useAuth()
+
+  if (isLoading) return <AuthLoading />
+  if (!user) return <Navigate to="/login" />
+  if (!user.onboarded) return <Navigate to="/onboarding" />
+  return <Navigate to="/dashboard" />
 }

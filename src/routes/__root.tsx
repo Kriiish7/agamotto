@@ -1,8 +1,15 @@
-import { HeadContent, Scripts, createRootRouteWithContext } from "@tanstack/react-router"
+import {
+  HeadContent,
+  Outlet,
+  Scripts,
+  createRootRouteWithContext,
+} from "@tanstack/react-router"
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools"
 import { TanStackDevtools } from "@tanstack/react-devtools"
 import type { QueryClient } from "@tanstack/react-query"
 
+import { AuthProvider } from "@/lib/auth"
+import { TooltipProvider } from "@/components/ui/tooltip"
 import appCss from "../styles.css?url"
 
 export const Route = createRootRouteWithContext<{
@@ -18,7 +25,7 @@ export const Route = createRootRouteWithContext<{
         content: "width=device-width, initial-scale=1",
       },
       {
-        title: "TanStack Start Starter",
+        title: "Agamotto",
       },
     ],
     links: [
@@ -34,8 +41,19 @@ export const Route = createRootRouteWithContext<{
       <p>The requested page could not be found.</p>
     </main>
   ),
+  component: RootComponent,
   shellComponent: RootDocument,
 })
+
+function RootComponent() {
+  return (
+    <AuthProvider>
+      <TooltipProvider>
+        <Outlet />
+      </TooltipProvider>
+    </AuthProvider>
+  )
+}
 
 function RootDocument({ children }: { children: React.ReactNode }) {
   return (
