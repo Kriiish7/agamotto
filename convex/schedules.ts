@@ -26,7 +26,19 @@ const scheduleBlockStatus = v.union(
   v.literal("moved"),
 )
 
+type DeferredItem = {
+  taskId: string
+  title: string
+  reason: string
+}
+
 type DbCtx = MutationCtx | QueryCtx
+
+function normalizeDeferred(
+  items: readonly DeferredItem[] | undefined,
+): DeferredItem[] {
+  return items ? [...items] : []
+}
 
 async function requireUser(
   ctx: DbCtx,
@@ -115,7 +127,12 @@ export const getSchedule = query({
         q.eq("scheduleId", args.scheduleId),
       )
       .collect()
-    return { schedule: scheduleDoc, blocks }
+    return {
+      schedule: scheduleDoc,
+      blocks,
+      delayed: normalizeDeferred(scheduleDoc.delayed),
+      excluded: normalizeDeferred(scheduleDoc.excluded),
+    }
   },
 })
 
@@ -170,6 +187,8 @@ export const generateSchedule = mutation({
     )
 
     const now = Date.now()
+    const delayed = normalizeDeferred(result.delayed)
+    const excluded = normalizeDeferred(result.excluded)
     const scheduleId = await ctx.db.insert("schedules", {
       userId: args.userId,
       rangeStart: args.rangeStart,
@@ -177,6 +196,8 @@ export const generateSchedule = mutation({
       mode: result.mode,
       generatedAt: now,
       status: "active",
+      delayed,
+      excluded,
     })
 
     const blockIds = await insertBlocksFromResult(ctx, {
@@ -190,8 +211,8 @@ export const generateSchedule = mutation({
       mode: result.mode,
       blockIds,
       blockCount: blockIds.length,
-      delayed: result.delayed,
-      excluded: result.excluded,
+      delayed,
+      excluded,
     }
   },
 })
@@ -248,6 +269,8 @@ export const rescheduleIncomplete = mutation({
     )
 
     const result = schedule(tasksToPlace, freeWindows)
+    const delayed = normalizeDeferred(result.delayed)
+    const excluded = normalizeDeferred(result.excluded)
 
     const blockIds = await insertBlocksFromResult(ctx, {
       scheduleId: args.scheduleId,
@@ -255,11 +278,13 @@ export const rescheduleIncomplete = mutation({
       blocks: result.blocks,
     })
 
-    // Mode may change after overrides carve capacity — persist it.
+    // Mode / deferred may change after overrides carve capacity — persist both.
     await ctx.db.patch(args.scheduleId, {
       mode: result.mode,
       generatedAt: Date.now(),
       status: "active",
+      delayed,
+      excluded,
     })
 
     return {
@@ -270,8 +295,8 @@ export const rescheduleIncomplete = mutation({
       removedCount: regeneratable.length,
       blockIds,
       blockCount: blockIds.length,
-      delayed: result.delayed,
-      excluded: result.excluded,
+      delayed,
+      excluded,
     }
   },
 })
