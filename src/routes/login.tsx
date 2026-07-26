@@ -1,7 +1,9 @@
+import { createFileRoute, useNavigate } from "@tanstack/react-router"
 import * as React from "react"
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
+import { ArrowRight } from "@phosphor-icons/react"
 
 import { RedirectIfAuthed } from "@/components/auth-gate"
+import { ThemeToggle } from "@/components/theme-toggle"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -44,16 +46,18 @@ function LoginForm() {
   }
 
   return (
-    <main className="flex min-h-svh items-center justify-center bg-[radial-gradient(ellipse_at_top,_oklch(0.97_0.02_264),_oklch(0.98_0_0)_55%)] p-6">
+    <main className="relative flex min-h-[100dvh] items-center justify-center bg-background p-6">
+      <div className="absolute top-4 right-4">
+        <ThemeToggle />
+      </div>
+
       <Card className="w-full max-w-md">
-        <CardHeader>
-          <p className="text-xs font-medium tracking-[0.18em] text-muted-foreground uppercase">
-            Agamotto
-          </p>
-          <CardTitle className="text-2xl">Welcome back</CardTitle>
+        <CardHeader className="gap-2">
+          <CardTitle className="font-heading text-2xl font-semibold">
+            Welcome back
+          </CardTitle>
           <CardDescription>
-            Sign in to continue. Auth is stubbed locally until Convex Auth is
-            wired.
+            Sign in to continue shaping your schedule.
           </CardDescription>
         </CardHeader>
         <form onSubmit={onSubmit}>
@@ -84,7 +88,8 @@ function LoginForm() {
                   required
                 />
                 <FieldDescription>
-                  Any values work — this is a fake session for shell development.
+                  Any values work — this is a stub session for shell
+                  development.
                 </FieldDescription>
               </Field>
             </FieldGroup>
@@ -92,12 +97,10 @@ function LoginForm() {
           <CardFooter className="flex flex-col items-stretch gap-3">
             <Button type="submit" className="w-full">
               Continue
+              <ArrowRight data-icon="inline-end" />
             </Button>
             <p className="text-center text-xs text-muted-foreground">
-              New here?{" "}
-              <Link to="/onboarding" className="underline underline-offset-4">
-                Start onboarding
-              </Link>
+              New here? Complete onboarding after you continue.
             </p>
           </CardFooter>
         </form>

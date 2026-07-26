@@ -18,7 +18,16 @@ import {
   countByStatus,
   formatDateRange,
 } from "@/components/analytics/labels"
+import { PageHeader } from "@/components/page-header"
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/empty"
 import { Separator } from "@/components/ui/separator"
+import { ChartBar } from "@phosphor-icons/react"
 import { api } from "../../../convex/_generated/api"
 import type { Id } from "../../../convex/_generated/dataModel"
 
@@ -72,29 +81,39 @@ function AnalyticsPage() {
   const selectedMeta = scheduleDetail?.schedule
 
   return (
-    <section className="space-y-8">
-      <div className="space-y-2">
-        <h1 className="text-2xl font-medium tracking-tight">Analytics</h1>
-        <p className="max-w-2xl text-sm text-muted-foreground">
-          Completion-state breakdown for tasks and schedule blocks, plus a list
-          of generated schedules. Timeline editing lives under{" "}
-          <Link
-            to="/dashboard/schedule"
-            className="font-medium text-foreground underline-offset-4 hover:underline"
-          >
-            Schedule
-          </Link>
-          .
-        </p>
-      </div>
+    <section className="flex flex-col gap-8">
+      <PageHeader
+        title="Analytics"
+        description={
+          <>
+            Completion-state breakdown for tasks and schedule blocks. Timeline
+            editing lives under{" "}
+            <Link
+              to="/dashboard/schedule"
+              className="rounded-sm font-medium text-foreground underline-offset-4 hover:underline focus-visible:ring-3 focus-visible:ring-ring/30 focus-visible:outline-none"
+            >
+              Schedule
+            </Link>
+            .
+          </>
+        }
+      />
 
       {!userId ? (
-        <p className="text-sm text-muted-foreground">
-          Paste a seeded Convex userId in the demo strip below to load analytics.
-        </p>
+        <Empty className="border border-dashed border-border/80 bg-card/40">
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              <ChartBar weight="duotone" />
+            </EmptyMedia>
+            <EmptyTitle>Connect a demo user</EmptyTitle>
+            <EmptyDescription>
+              Paste a seeded Convex userId in the strip below to load analytics.
+            </EmptyDescription>
+          </EmptyHeader>
+        </Empty>
       ) : (
         <>
-          <div className="grid gap-8 lg:grid-cols-2">
+          <div className="grid gap-6 lg:grid-cols-2">
             <StatusBreakdown
               title="Task completion"
               description="Counts by task status across the board."

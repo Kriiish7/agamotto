@@ -50,26 +50,26 @@ export function GenerateScheduleForm({
   return (
     <form
       onSubmit={(e) => void handleGenerate(e)}
-      className="relative overflow-hidden rounded-2xl border border-zinc-200/80 bg-gradient-to-br from-zinc-50 via-white to-zinc-100/80 p-4 sm:p-5"
+      className="relative overflow-hidden rounded-2xl border border-border/80 bg-card/80 p-4 shadow-[0_16px_50px_-40px_oklch(0.4_0.08_264_/_0.5)] backdrop-blur-sm sm:p-5"
     >
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 opacity-[0.35]"
+        className="pointer-events-none absolute inset-0 opacity-40"
         style={{
           backgroundImage:
-            "radial-gradient(ellipse at 0% 0%, oklch(0.92 0.01 80 / 0.7), transparent 55%), radial-gradient(ellipse at 100% 100%, oklch(0.93 0.008 250 / 0.5), transparent 50%)",
+            "radial-gradient(ellipse at 0% 0%, oklch(0.94 0.03_264 / 0.7), transparent 55%), radial-gradient(ellipse at 100% 100%, oklch(0.95 0.02 230 / 0.45), transparent 50%)",
         }}
       />
-      <div className="relative space-y-4">
+      <div className="relative flex flex-col gap-4">
         <div className="flex items-start gap-3">
-          <div className="flex size-9 shrink-0 items-center justify-center rounded-xl border border-zinc-200 bg-white text-zinc-700 shadow-sm">
-            <CalendarBlankIcon className="size-4" weight="duotone" />
+          <div className="flex size-9 shrink-0 items-center justify-center rounded-xl border border-border bg-background text-primary shadow-sm">
+            <CalendarBlankIcon weight="duotone" />
           </div>
-          <div>
-            <h2 className="text-sm font-medium tracking-tight text-zinc-900">
+          <div className="flex flex-col gap-1">
+            <h2 className="font-heading text-sm font-medium tracking-tight">
               Generate schedule
             </h2>
-            <p className="mt-0.5 max-w-xl text-sm text-zinc-500">
+            <p className="max-w-xl text-sm text-muted-foreground">
               Pick a horizon. Agamotto packs ready tasks into your working
               windows and explains every placement.
             </p>

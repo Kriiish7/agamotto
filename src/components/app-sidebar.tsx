@@ -9,7 +9,8 @@ import {
   SignOut,
 } from "@phosphor-icons/react"
 
-import { useAuth } from "@/lib/auth"
+import { BrandMark } from "@/components/brand-mark"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import {
   Sidebar,
   SidebarContent,
@@ -24,6 +25,7 @@ import {
   SidebarRail,
   useSidebar,
 } from "@/components/ui/sidebar"
+import { useAuth } from "@/lib/auth"
 
 const navItems = [
   { title: "Home", to: "/dashboard", icon: House },
@@ -39,22 +41,29 @@ export function AppSidebar() {
   const pathname = useRouterState({ select: (s) => s.location.pathname })
   const { setOpenMobile } = useSidebar()
 
-  // Close the mobile sheet whenever the route changes (nav click or back).
   React.useEffect(() => {
     setOpenMobile(false)
   }, [pathname, setOpenMobile])
 
+  const initials =
+    user?.name
+      ?.split(/\s+/)
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((part) => part[0]?.toUpperCase() ?? "")
+      .join("") || "A"
+
   return (
-    <Sidebar collapsible="icon">
-      <SidebarHeader>
-        <div className="flex items-center gap-2 px-2 py-1.5">
-          <div className="flex size-8 items-center justify-center rounded-xl bg-sidebar-primary text-sm font-semibold text-sidebar-primary-foreground">
-            A
-          </div>
+    <Sidebar collapsible="icon" className="border-border/70">
+      <SidebarHeader className="border-b border-sidebar-border/80">
+        <div className="flex items-center gap-2 px-2 py-2">
+          <BrandMark size="sm" />
           <div className="min-w-0 group-data-[collapsible=icon]:hidden">
-            <p className="truncate text-sm font-medium">Agamotto</p>
+            <p className="truncate font-heading text-sm font-semibold tracking-tight">
+              Agamotto
+            </p>
             <p className="truncate text-xs text-muted-foreground">
-              {user?.name ?? "Guest"}
+              Schedule with reasons
             </p>
           </div>
         </div>
@@ -62,14 +71,14 @@ export function AppSidebar() {
 
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Navigate</SidebarGroupLabel>
+          <SidebarGroupLabel>Workspace</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {navItems.map((item) => {
                 const Icon = item.icon
                 const isActive =
                   item.to === "/dashboard"
-                    ? pathname === "/dashboard"
+                    ? pathname === "/dashboard" || pathname === "/dashboard/"
                     : pathname === item.to || pathname.startsWith(`${item.to}/`)
 
                 return (
@@ -91,8 +100,23 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter>
+      <SidebarFooter className="border-t border-sidebar-border/80">
         <SidebarMenu>
+          <SidebarMenuItem>
+            <div className="mb-1 flex items-center gap-2.5 rounded-xl px-2 py-2 group-data-[collapsible=icon]:justify-center">
+              <Avatar size="sm">
+                <AvatarFallback>{initials}</AvatarFallback>
+              </Avatar>
+              <div className="min-w-0 group-data-[collapsible=icon]:hidden">
+                <p className="truncate text-sm font-medium">
+                  {user?.name ?? "Guest"}
+                </p>
+                <p className="truncate text-xs text-muted-foreground">
+                  {user?.email ?? "stub session"}
+                </p>
+              </div>
+            </div>
+          </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton
               tooltip="Sign out"

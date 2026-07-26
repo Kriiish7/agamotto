@@ -2,6 +2,7 @@ import * as React from "react"
 import { createFileRoute } from "@tanstack/react-router"
 import { useMutation, useQuery } from "convex/react"
 
+import { PageHeader } from "@/components/page-header"
 import {
   DemoUserSetup,
   GenerateScheduleForm,
@@ -10,6 +11,8 @@ import {
   useDemoUserId,
 } from "@/components/schedule"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import { useAuth } from "@/lib/auth"
 import { api } from "../../../convex/_generated/api"
 import type { Doc, Id } from "../../../convex/_generated/dataModel"
@@ -139,26 +142,24 @@ function SchedulePage() {
     Boolean(userId && activeScheduleId) && scheduleDetail === undefined
 
   return (
-    <section className="relative space-y-6">
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -inset-x-6 -top-6 h-40 bg-[radial-gradient(ellipse_at_top_left,oklch(0.95_0.01_85),transparent_55%),radial-gradient(ellipse_at_top_right,oklch(0.96_0.008_250),transparent_50%)]"
+    <section className="relative flex flex-col gap-8">
+      <PageHeader
+        title="Schedule"
+        description={
+          <>
+            Generate a plan, then read the timeline as a trail of decisions —
+            every block says why it is there
+            {user?.name ? (
+              <>
+                {" "}
+                · signed in as{" "}
+                <span className="font-medium text-foreground">{user.name}</span>
+              </>
+            ) : null}
+            .
+          </>
+        }
       />
-
-      <div className="relative space-y-2">
-        <h1 className="text-2xl font-medium tracking-tight">Schedule</h1>
-        <p className="max-w-2xl text-sm text-muted-foreground">
-          Generate a plan, then read the timeline as a trail of decisions —
-          every block says why it is there.
-          {user?.name ? (
-            <>
-              {" "}
-              Signed in as{" "}
-              <span className="text-foreground">{user.name}</span>.
-            </>
-          ) : null}
-        </p>
-      </div>
 
       <GenerateScheduleForm
         disabled={!userId}
@@ -176,41 +177,45 @@ function SchedulePage() {
       ) : null}
 
       {packedSummary ? (
-        <p className="text-sm text-zinc-500">
-          This schedule packed{" "}
-          <span className="font-medium text-zinc-800">
-            {packedSummary.blockCount}
-          </span>{" "}
-          blocks in{" "}
-          <span className="font-medium capitalize text-zinc-800">
+        <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+          <span>
+            Packed{" "}
+            <span className="font-medium text-foreground">
+              {packedSummary.blockCount}
+            </span>{" "}
+            blocks in
+          </span>
+          <Badge variant="secondary" className="capitalize">
             {packedSummary.mode}
-          </span>{" "}
-          mode
-          {packedSummary.delayedCount + packedSummary.excludedCount > 0
-            ? ` · ${packedSummary.delayedCount} delayed · ${packedSummary.excludedCount} excluded`
-            : null}
-          .
-        </p>
+          </Badge>
+          {packedSummary.delayedCount + packedSummary.excludedCount > 0 ? (
+            <span>
+              · {packedSummary.delayedCount} delayed ·{" "}
+              {packedSummary.excludedCount} excluded
+            </span>
+          ) : null}
+        </div>
       ) : null}
 
       {schedules && schedules.length > 1 ? (
         <div className="flex flex-wrap gap-2">
-          {schedules.slice(0, 6).map((s) => (
-            <button
-              key={s._id}
-              type="button"
-              onClick={() => setActiveScheduleId(s._id)}
-              className={
-                s._id === activeScheduleId
-                  ? "rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-1.5 text-xs font-medium text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                  : "rounded-xl border border-zinc-200 bg-white px-3 py-1.5 text-xs font-medium text-zinc-600 hover:border-zinc-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-              }
-            >
-              <span className="capitalize">{s.status}</span>
-              <span className="mx-1 text-zinc-400">·</span>
-              <span className="capitalize">{s.mode}</span>
-            </button>
-          ))}
+          {schedules.slice(0, 6).map((s) => {
+            const selected = s._id === activeScheduleId
+            return (
+              <Button
+                key={s._id}
+                type="button"
+                size="sm"
+                variant={selected ? "default" : "outline"}
+                aria-pressed={selected}
+                onClick={() => setActiveScheduleId(s._id)}
+              >
+                <span className="capitalize">{s.status}</span>
+                <span className="text-muted-foreground">·</span>
+                <span className="capitalize">{s.mode}</span>
+              </Button>
+            )
+          })}
         </div>
       ) : null}
 

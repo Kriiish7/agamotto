@@ -1,6 +1,14 @@
 import * as React from "react"
+import { CalendarBlank } from "@phosphor-icons/react"
 
 import { Badge } from "@/components/ui/badge"
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/empty"
 import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
 import type { Doc, Id } from "../../../convex/_generated/dataModel"
@@ -42,7 +50,6 @@ function groupBlocksByDay(
     if (list) {
       list.push(block)
     } else {
-      // Outside displayed range — still show under that day key
       map.set(day, [block])
     }
   }
@@ -63,7 +70,11 @@ export function ScheduleTimeline({
 }: ScheduleTimelineProps) {
   if (loading) {
     return (
-      <div className="space-y-3" aria-busy="true" aria-label="Loading timeline">
+      <div
+        className="flex flex-col gap-3"
+        aria-busy="true"
+        aria-label="Loading timeline"
+      >
         <Skeleton className="h-8 w-48" />
         <Skeleton className="h-28 w-full rounded-xl" />
         <Skeleton className="h-28 w-full rounded-xl" />
@@ -73,14 +84,18 @@ export function ScheduleTimeline({
 
   if (!schedule || !blocks) {
     return (
-      <div className="rounded-2xl border border-dashed border-zinc-300 bg-zinc-50/50 px-5 py-10 text-center">
-        <p className="text-sm font-medium text-zinc-800">No schedule yet</p>
-        <p className="mx-auto mt-1 max-w-md text-sm text-zinc-500">
-          Generate a plan for a date range. Each block will show{" "}
-          <span className="text-zinc-700">why</span> it landed there — not just
-          when.
-        </p>
-      </div>
+      <Empty className="border border-dashed border-border/80 bg-card/50">
+        <EmptyHeader>
+          <EmptyMedia variant="icon">
+            <CalendarBlank weight="duotone" />
+          </EmptyMedia>
+          <EmptyTitle>No schedule yet</EmptyTitle>
+          <EmptyDescription>
+            Generate a plan for a date range. Each block will show why it landed
+            there — not just when.
+          </EmptyDescription>
+        </EmptyHeader>
+      </Empty>
     )
   }
 
@@ -92,15 +107,15 @@ export function ScheduleTimeline({
   const overrideCount = blocks.filter((b) => b.isManualOverride).length
 
   return (
-    <div className="space-y-6">
-      <header className="flex flex-wrap items-end justify-between gap-3 border-b border-zinc-200 pb-3">
-        <div>
-          <p className="text-[10px] font-medium tracking-[0.16em] text-zinc-400 uppercase">
+    <div className="flex flex-col gap-6">
+      <header className="flex flex-wrap items-end justify-between gap-3 border-b border-border/80 pb-3">
+        <div className="flex flex-col gap-1">
+          <p className="text-[10px] font-medium tracking-[0.16em] text-muted-foreground uppercase">
             Timeline
           </p>
-          <h2 className="mt-1 text-lg font-medium tracking-tight text-zinc-900">
+          <h2 className="font-heading text-lg font-medium tracking-tight">
             {formatDayHeading(schedule.rangeStart)}
-            <span className="mx-2 text-zinc-300">→</span>
+            <span className="mx-2 text-border">→</span>
             {formatDayHeading(schedule.rangeEnd)}
           </h2>
         </div>
@@ -109,19 +124,15 @@ export function ScheduleTimeline({
             variant="outline"
             className={cn(
               "capitalize",
-              schedule.mode === "crunch"
-                ? "border-amber-400 bg-amber-50 text-amber-950"
-                : "border-zinc-300 bg-zinc-50 text-zinc-800",
+              schedule.mode === "crunch" &&
+                "border-warning/70 bg-warning/25 text-warning-foreground",
             )}
           >
             {schedule.mode} mode
           </Badge>
           <Badge variant="secondary">{blocks.length} blocks</Badge>
           {overrideCount > 0 ? (
-            <Badge
-              variant="outline"
-              className="border-dashed border-zinc-500 text-zinc-700"
-            >
+            <Badge variant="outline" className="border-dashed">
               {overrideCount} pinned
             </Badge>
           ) : null}
@@ -134,7 +145,7 @@ export function ScheduleTimeline({
         mode={schedule.mode}
       />
 
-      <div className="space-y-8">
+      <div className="flex flex-col gap-8">
         {grouped.map(([dayStart, dayBlocks], dayIndex) => {
           const isEmpty = dayBlocks.length === 0
           return (
@@ -144,15 +155,14 @@ export function ScheduleTimeline({
               style={
                 {
                   "--day-i": dayIndex,
-                  animationDelay: `${dayIndex * 40}ms`,
                 } as React.CSSProperties
               }
             >
               <div className="sm:sticky sm:top-4 sm:self-start">
-                <p className="text-sm font-medium text-zinc-900">
+                <p className="text-sm font-medium">
                   {formatDayHeading(dayStart)}
                 </p>
-                <p className="mt-0.5 font-mono text-[11px] text-zinc-400">
+                <p className="mt-0.5 font-mono text-[11px] text-muted-foreground">
                   {isEmpty
                     ? "open"
                     : `${dayBlocks.length} block${dayBlocks.length === 1 ? "" : "s"}`}
@@ -162,10 +172,10 @@ export function ScheduleTimeline({
               <div className="relative min-w-0">
                 <div
                   aria-hidden
-                  className="absolute top-2 bottom-2 left-[7px] hidden w-px bg-zinc-200 sm:block"
+                  className="absolute top-2 bottom-2 left-[7px] hidden w-px bg-border sm:block"
                 />
                 {isEmpty ? (
-                  <p className="rounded-xl border border-dashed border-zinc-200 px-3 py-4 text-sm text-zinc-400">
+                  <p className="rounded-xl border border-dashed border-border px-3 py-4 text-sm text-muted-foreground">
                     No work placed through{" "}
                     {new Intl.DateTimeFormat(undefined, {
                       hour: "numeric",
@@ -174,18 +184,12 @@ export function ScheduleTimeline({
                     .
                   </p>
                 ) : (
-                  <ul className="space-y-3">
-                    {dayBlocks.map((block, i) => (
-                      <li
-                        key={block._id}
-                        className="relative sm:pl-5"
-                        style={{
-                          animationDelay: `${dayIndex * 40 + i * 30}ms`,
-                        }}
-                      >
+                  <ul className="flex flex-col gap-3">
+                    {dayBlocks.map((block) => (
+                      <li key={block._id} className="relative sm:pl-5">
                         <span
                           aria-hidden
-                          className="absolute top-4 left-0 hidden size-3.5 rounded-full border-2 border-white bg-zinc-400 shadow-sm sm:block"
+                          className="absolute top-4 left-0 hidden size-3.5 rounded-full border-2 border-background bg-muted-foreground/50 shadow-sm sm:block"
                         />
                         <TimelineBlockCard
                           block={block}

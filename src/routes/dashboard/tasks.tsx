@@ -2,6 +2,7 @@ import * as React from "react"
 import { createFileRoute } from "@tanstack/react-router"
 import { useMutation, useQuery } from "convex/react"
 
+import { PageHeader } from "@/components/page-header"
 import {
   CancelTaskDialog,
   DemoUserSetup,
@@ -11,12 +12,21 @@ import {
   useDemoUserId,
 } from "@/components/tasks"
 import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/empty"
+import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { Skeleton } from "@/components/ui/skeleton"
+import { ListChecks } from "@phosphor-icons/react"
 import { useAuth } from "@/lib/auth"
 import { api } from "../../../convex/_generated/api"
 import type { Doc } from "../../../convex/_generated/dataModel"
@@ -79,71 +89,87 @@ function TasksPage() {
   }
 
   return (
-    <section className="space-y-6">
-      <div className="space-y-2">
-        <h1 className="text-2xl font-medium tracking-tight">Tasks</h1>
-        <p className="max-w-2xl text-sm text-muted-foreground">
-          Quick-add with light natural-language heuristics, then edit or
-          soft-cancel. Signed in as{" "}
-          <span className="text-foreground">{user?.name ?? "guest"}</span>
-          {user?.email ? (
-            <>
-              {" "}
-              (<span className="font-mono text-xs">{user.email}</span>)
-            </>
-          ) : null}
-          .
-        </p>
-      </div>
+    <section className="flex flex-col gap-8">
+      <PageHeader
+        title="Tasks"
+        description={
+          <>
+            Quick-add with light natural-language heuristics, then edit or
+            soft-cancel
+            {user?.name ? (
+              <>
+                {" "}
+                · signed in as{" "}
+                <span className="font-medium text-foreground">{user.name}</span>
+              </>
+            ) : null}
+            .
+          </>
+        }
+      />
 
       <QuickAddBar disabled={!userId} onSubmit={handleQuickAdd} />
 
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <h2 className="text-sm font-medium">Your tasks</h2>
-        <Select
-          value={statusFilter}
-          onValueChange={(v) => {
-            if (v != null) setStatusFilter(v as StatusFilter)
-          }}
-          disabled={!userId}
-        >
-          <SelectTrigger size="sm" className="w-44">
-            <SelectValue>
-              {(value) => {
-                if (value === "active") return "Active"
-                if (value === "all") return "All"
-                if (typeof value === "string" && value in STATUS_LABEL) {
-                  return STATUS_LABEL[value as TaskStatus]
-                }
-                return "Filter"
-              }}
-            </SelectValue>
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="active">Active</SelectItem>
-            <SelectItem value="all">All</SelectItem>
-            {TASK_STATUSES.map((s) => (
-              <SelectItem key={s} value={s}>
-                {STATUS_LABEL[s]}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
+      <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <h2 className="font-heading text-sm font-medium">Your tasks</h2>
+          <Select
+            value={statusFilter}
+            onValueChange={(v) => {
+              if (v != null) setStatusFilter(v as StatusFilter)
+            }}
+            disabled={!userId}
+          >
+            <SelectTrigger size="sm" className="w-44">
+              <SelectValue>
+                {(value) => {
+                  if (value === "active") return "Active"
+                  if (value === "all") return "All"
+                  if (typeof value === "string" && value in STATUS_LABEL) {
+                    return STATUS_LABEL[value as TaskStatus]
+                  }
+                  return "Filter"
+                }}
+              </SelectValue>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="active">Active</SelectItem>
+              <SelectItem value="all">All</SelectItem>
+              {TASK_STATUSES.map((s) => (
+                <SelectItem key={s} value={s}>
+                  {STATUS_LABEL[s]}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
 
-      {!userId ? (
-        <p className="text-sm text-muted-foreground">
-          Paste a seeded Convex userId in the demo strip below to load tasks.
-        </p>
-      ) : tasks === undefined ? (
-        <p className="text-sm text-muted-foreground">Loading tasks…</p>
-      ) : (
-        <TaskTable
-          tasks={visibleTasks}
-          onEdit={setEditing}
-          onCancel={setCancelling}
-        />
-      )}
+        {!userId ? (
+          <Empty className="border border-dashed border-border/80 bg-card/40">
+            <EmptyHeader>
+              <EmptyMedia variant="icon">
+                <ListChecks weight="duotone" />
+              </EmptyMedia>
+              <EmptyTitle>Connect a demo user</EmptyTitle>
+              <EmptyDescription>
+                Paste a seeded Convex userId in the strip below to load tasks.
+              </EmptyDescription>
+            </EmptyHeader>
+          </Empty>
+        ) : tasks === undefined ? (
+          <div className="flex flex-col gap-3">
+            <Skeleton className="h-12 w-full rounded-xl" />
+            <Skeleton className="h-12 w-full rounded-xl" />
+            <Skeleton className="h-12 w-full rounded-xl" />
+          </div>
+        ) : (
+          <TaskTable
+            tasks={visibleTasks}
+            onEdit={setEditing}
+            onCancel={setCancelling}
+          />
+        )}
+      </div>
 
       <EditTaskDialog
         task={editing}

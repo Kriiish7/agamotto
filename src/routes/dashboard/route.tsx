@@ -2,12 +2,14 @@ import { Outlet, createFileRoute } from "@tanstack/react-router"
 
 import { AppSidebar } from "@/components/app-sidebar"
 import { RequireAuth } from "@/components/auth-gate"
+import { DashboardBreadcrumb } from "@/components/dashboard-breadcrumb"
+import { ThemeToggle } from "@/components/theme-toggle"
+import { Separator } from "@/components/ui/separator"
 import {
   SidebarInset,
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar"
-import { Separator } from "@/components/ui/separator"
 
 export const Route = createFileRoute("/dashboard")({
   component: DashboardLayout,
@@ -24,16 +26,19 @@ function DashboardLayout() {
           Skip to content
         </a>
         <AppSidebar />
-        <SidebarInset>
-          <header className="flex h-14 shrink-0 items-center gap-2 border-b px-4">
+        <SidebarInset className="bg-transparent">
+          <header className="sticky top-0 z-10 flex h-14 shrink-0 items-center gap-3 border-b border-border/70 bg-background/75 px-4 backdrop-blur-md md:px-6">
             <SidebarTrigger className="-ml-1 min-h-11 min-w-11 md:min-h-8 md:min-w-8" />
-            <Separator orientation="vertical" className="mr-2 h-4" />
-            <p className="text-sm text-muted-foreground">Dashboard</p>
+            <Separator orientation="vertical" className="h-4" />
+            <DashboardBreadcrumb />
+            <div className="ml-auto">
+              <ThemeToggle />
+            </div>
           </header>
           <div
             id="main-content"
             tabIndex={-1}
-            className="flex flex-1 flex-col gap-4 p-6 outline-none"
+            className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-8 p-4 outline-none md:gap-10 md:p-8"
           >
             <Outlet />
           </div>

@@ -9,6 +9,7 @@ import { TanStackDevtools } from "@tanstack/react-devtools"
 import type { QueryClient } from "@tanstack/react-query"
 
 import { AuthProvider } from "@/lib/auth"
+import { ThemeProvider, themeBootScript } from "@/lib/theme"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import appCss from "../styles.css?url"
 
@@ -36,9 +37,13 @@ export const Route = createRootRouteWithContext<{
     ],
   }),
   notFoundComponent: () => (
-    <main className="container mx-auto p-4 pt-16">
-      <h1>404</h1>
-      <p>The requested page could not be found.</p>
+    <main className="flex min-h-[100dvh] items-center justify-center p-6">
+      <div className="flex max-w-md flex-col items-center gap-3 text-center">
+        <p className="font-heading text-4xl font-semibold tracking-tight">404</p>
+        <p className="text-muted-foreground">
+          The page you requested does not exist.
+        </p>
+      </div>
     </main>
   ),
   component: RootComponent,
@@ -47,19 +52,22 @@ export const Route = createRootRouteWithContext<{
 
 function RootComponent() {
   return (
-    <AuthProvider>
-      <TooltipProvider>
-        <Outlet />
-      </TooltipProvider>
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <TooltipProvider>
+          <Outlet />
+        </TooltipProvider>
+      </AuthProvider>
+    </ThemeProvider>
   )
 }
 
 function RootDocument({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
         <HeadContent />
+        <script dangerouslySetInnerHTML={{ __html: themeBootScript }} />
       </head>
       <body>
         {children}

@@ -8,12 +8,14 @@
  * @module
  */
 
+import type * as crons from "../crons.js";
 import type * as lib_scheduleHelpers from "../lib/scheduleHelpers.js";
 import type * as notifications from "../notifications.js";
 import type * as schedulerBridge from "../schedulerBridge.js";
 import type * as schedules from "../schedules.js";
 import type * as seed from "../seed.js";
 import type * as tasks from "../tasks.js";
+
 import type {
   ApiFromModules,
   FilterApi,
@@ -21,6 +23,7 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  crons: typeof crons;
   "lib/scheduleHelpers": typeof lib_scheduleHelpers;
   notifications: typeof notifications;
   schedulerBridge: typeof schedulerBridge;

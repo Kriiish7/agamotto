@@ -1,7 +1,9 @@
 import * as React from "react"
 import { createFileRoute, Link, Navigate, useNavigate } from "@tanstack/react-router"
+import { ArrowRight } from "@phosphor-icons/react"
 
 import { AuthLoading } from "@/components/auth-gate"
+import { ThemeToggle } from "@/components/theme-toggle"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -41,16 +43,19 @@ function OnboardingPage() {
   }
 
   return (
-    <main className="flex min-h-svh items-center justify-center bg-[radial-gradient(ellipse_at_top,_oklch(0.97_0.02_264),_oklch(0.98_0_0)_55%)] p-6">
+    <main className="relative flex min-h-[100dvh] items-center justify-center bg-background p-6">
+      <div className="absolute top-4 right-4">
+        <ThemeToggle />
+      </div>
+
       <Card className="w-full max-w-md">
-        <CardHeader>
-          <p className="text-xs font-medium tracking-[0.18em] text-muted-foreground uppercase">
-            Agamotto
-          </p>
-          <CardTitle className="text-2xl">Set up your day</CardTitle>
+        <CardHeader className="gap-2">
+          <CardTitle className="font-heading text-2xl font-semibold">
+            Set up your day
+          </CardTitle>
           <CardDescription>
-            Hi {user.name}. Tell us what matters most — we&apos;ll use this later
-            for scheduling.
+            Hi {user.name}. Tell us what matters most — we&apos;ll use this
+            later when packing your schedule.
           </CardDescription>
         </CardHeader>
         <form onSubmit={onSubmit}>
@@ -74,10 +79,14 @@ function OnboardingPage() {
           <CardFooter className="flex flex-col items-stretch gap-3">
             <Button type="submit" className="w-full">
               Enter dashboard
+              <ArrowRight data-icon="inline-end" />
             </Button>
             <p className="text-center text-xs text-muted-foreground">
               Wrong account?{" "}
-              <Link to="/login" className="underline underline-offset-4">
+              <Link
+                to="/login"
+                className="rounded-sm font-medium text-foreground underline-offset-4 hover:underline focus-visible:ring-3 focus-visible:ring-ring/30 focus-visible:outline-none"
+              >
                 Back to login
               </Link>
             </p>
